@@ -11,13 +11,19 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.PermissionChecker;
+import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -37,10 +43,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     LatLng google = new LatLng(40.740637, -74.002039);
 
-    private FusedLocationProviderClient mFusedLocationClient;
+    //private FusedLocationProviderClient mFusedLocationClient;
 
 
     private final int PERMISSAO_LOCALIZACAO_E_INTERNET_CODE = 0;
+
+
+    /* For Google Fused API */
+    //private FusedLocationProviderClient mFusedLocationClient;
+    private SettingsClient mSettingsClient;
+    private LocationCallback mLocationCallback;
+    private LocationRequest mLocationRequest;
+
+
+
+    private Location mLastLocation;
+    FusedLocationProviderClient mFusedLocationClient;
+
 
 
     @Override
@@ -53,51 +72,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
 
-        context = this;
+        context = getApplicationContext();
 
 
         verificarPermissoes();
 
+        //mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+
 
         //Conectando ao Google Play Services
         //colocar no app build gradle a dependência implementation 'com.google.android.gms:play-services-location:11.8.0'
-        //mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+         //mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
 
-/*
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        try {
 
-            ActivityCompat.requestPermissions(this, new String[] {
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION },
-                    123456);
-            return;
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-*/
-
-        /*
-        mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            // Logic to handle location object
-                        }
-                    }
-                }); */
 
 
 
     }
+
+
+
+
 
 
     /**
