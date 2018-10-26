@@ -35,6 +35,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+
+
+//url1: https://google-developer-training.gitbooks.io/android-developer-advanced-course-practicals/unit-4-add-geo-features-to-your-apps/lesson-7-location/7-1-p-use-the-device-location/7-1-p-use-the-device-location.html
+//url2: https://androidclarified.com/fusedlocationproviderclient-current-location-example/
+
+
+
+//public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -61,11 +69,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     FusedLocationProviderClient mFusedLocationClient;
 
 
+    private GoogleApiClient googleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -76,6 +87,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         verificarPermissoes();
+
+
+        /*
+        //Instantiating the GoogleApiClient
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
+                */
 
         //mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
@@ -97,6 +119,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
+
+
+    /*
+    public void onStart() {
+        super.onStart();
+        // Initiating the connection
+        googleApiClient.connect();
+    }
+    public void onStop() {
+        super.onStop();
+        // Disconnecting the connection
+        googleApiClient.disconnect();
+    }
+*/
+
+
+
+    /*
+    //Callback invoked once the GoogleApiClient is connected successfully
+    @Override
+    public void onConnected(Bundle bundle) {
+        //Fetching the last known location using the FusedLocationProviderApi
+    }
+    @Override
+    public void onConnectionSuspended(int i) {
+    }
+    //Callback invoked if the GoogleApiClient connection fails
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+    }
+
+    */
 
 
 
