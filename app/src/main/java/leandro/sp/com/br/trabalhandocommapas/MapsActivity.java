@@ -14,6 +14,11 @@ import android.os.Bundle;
 import android.support.v4.content.PermissionChecker;
 import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -32,6 +37,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -79,53 +85,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleApiClient googleApiClient;
 
+
+    private TextView textViewDebug; //textView utilizado para mensagens de debug
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        //setContentView(R.layout.activity_maps);
+        setContentView(R.layout.activity_maps_com_debug); //esse layout contém um editText no topo usado para me nsagens de debug
 
+        textViewDebug = (TextView) findViewById(R.id.tDebug);
+
+        verificarPermissoes();
+
+        context = getApplicationContext();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
         mapFragment.getMapAsync(this);
-
-
-
-        context = getApplicationContext();
-
-
-        verificarPermissoes();
-
-
-        /*
-        //Instantiating the GoogleApiClient
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-
-                */
-
-        //mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
-
-
-        //Conectando ao Google Play Services
-        //colocar no app build gradle a dependência implementation 'com.google.android.gms:play-services-location:11.8.0'
-         //mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-
-
-        try {
-
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
 
 
     }
@@ -163,7 +142,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         //Ajustar o tipo de mapa  - (GoogleMap.MAP_TYPE_NORMAL, MAP_TYPE_HYBRID, MAP_TYPE_SATELLITE, MAP_TYPE_TERRAIN, MAP_TYPE_NONE
-        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mMap.setMapType(GoogleMap.MAP_TYPE_NONE);
 
 
 
@@ -171,7 +150,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //User has previously accepted this permission
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                //Exibe a localização do usuário - antes de ser chamado exige a permissão ACCESS_FINE_LOCATION (GPS)
+                //Exibe a localização do usuário (aquela bolinha azul no mapa) - antes de ser chamado exige a permissão ACCESS_FINE_LOCATION (GPS)
                 mMap.setMyLocationEnabled(true);
             }
             else {
@@ -210,38 +189,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         adicionarMarcador(mMap, latLngRuaJoseParonetto2, "Ponto Adicionado com imagem", "Ponto de teste imagem", R.mipmap.ic_launcher);
         // Fim Marcadores adicionados ao mapa
 
+        //Listener para cliques em cima de marcadores
+        adicionarListenerParaCliqueEmMarcador(mMap);
 
+        //Listener para cliques na info de marcadores
+        adicionarListenerParaCliqueNaInfoDeMarcador(mMap);
 
         //Listener para cliques no mapa
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                Double latitude = latLng.latitude;
-                Double longitude = latLng.longitude;
-                Toast.makeText(MapsActivity.this, "Latitude: " + latitude + ", Longitude: "+ longitude, Toast.LENGTH_SHORT).show();
+        adicionarListenerParaCliqueNoMapa(mMap);
 
-
-                // Criar marker no ponto onde foi clicado
-                MarkerOptions options = new MarkerOptions();
-                options.position( latLng );
-                mMap.addMarker( options );
-
-                // Configurando as propriedades da Linha - traçar uma linha entre dois markers - o anteriornmente criado e o novo criado ao clicar
-                PolylineOptions polylineOptions = new PolylineOptions();
-                polylineOptions.add( latLngRuaJoseParonetto );
-                polylineOptions.add( latLng );
-                polylineOptions.color( Color.BLUE );
-                // Adiciona a linha no mapa
-                mMap.addPolyline( polylineOptions );
-
-                //Para mover a câmera para o ponto de clique:
-                CameraUpdate update = CameraUpdateFactory.newLatLng( latLng );
-                mMap.animateCamera(update);
-
-
-            }
-        });
-
+        // Customiza a janela ao clicar em um marcador
+        customizarJanelaInfoDeMarcador(mMap);
 
 
         //Listener para movimento de câmera, executado quando o movimento termina
@@ -258,7 +216,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 double latitude =  mMap.getCameraPosition().target.latitude;
                 double longitude =  mMap.getCameraPosition().target.longitude;
 
-                Toast.makeText(MapsActivity.this, "OnCameraIdleListener() -> Latitude: " + latitude + ", Longitude: "+ longitude, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MapsActivity.this, "OnCameraIdleListener() -> Latitude: " + latitude + ", Longitude: "+ longitude, Toast.LENGTH_SHORT).show();
+
+                textViewDebug.setText("OnCameraIdleListener() ->: " + mPosition);
             }
         });
 
@@ -327,6 +287,105 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(markerOptions);
 
     }
+
+    private void adicionarListenerParaCliqueEmMarcador(GoogleMap mMap){
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+			@Override
+			public boolean onMarkerClick(Marker marker) {
+				LatLng lartLng = marker.getPosition();
+				Toast.makeText(getBaseContext(), "adicionarListenerParaCliqueEmMarcador(): " + marker.getTitle() + " > " + lartLng, Toast.LENGTH_SHORT).show();
+				return false;
+			}
+		});
+    }
+
+
+    private void adicionarListenerParaCliqueNaInfoDeMarcador(GoogleMap mMap) {
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                LatLng lartLng = marker.getPosition();
+                Toast.makeText(context, "adicionarListenerParaCliqueNaInfoDeMarcador() -> Clicou no: " + marker.getTitle() + " > " + lartLng, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void adicionarListenerParaCliqueNoMapa(final GoogleMap mMap) {
+        GoogleMap mMapInterno = mMap;
+
+        //Listener para cliques no mapa
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                Double latitude = latLng.latitude;
+                Double longitude = latLng.longitude;
+                Toast.makeText(MapsActivity.this, "Latitude: " + latitude + ", Longitude: "+ longitude, Toast.LENGTH_SHORT).show();
+
+
+                // Criar marker no ponto onde foi clicado
+                MarkerOptions options = new MarkerOptions();
+                options.position( latLng );
+                mMap.addMarker( options );
+
+                // Configurando as propriedades da Linha - traçar uma linha entre dois markers - o anteriornmente criado e o novo criado ao clicar
+                PolylineOptions polylineOptions = new PolylineOptions();
+                polylineOptions.add( latLngRuaJoseParonetto );
+                polylineOptions.add( latLng );
+                polylineOptions.color( Color.BLUE );
+                // Adiciona a linha no mapa
+                mMap.addPolyline( polylineOptions );
+
+                //Para mover a câmera para o ponto de clique:
+                CameraUpdate update = CameraUpdateFactory.newLatLng( latLng );
+                mMap.animateCamera(update);
+
+
+            }
+        });
+
+    }
+
+
+    private void customizarJanelaInfoDeMarcador(final GoogleMap mMap) {
+        // Customiza a janela ao clicar em um marcador
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() { //Customiza a borda da janela info de um marcador
+            @Override
+            public View getInfoWindow(Marker marker) {
+                LinearLayout linear = (LinearLayout) this.getInfoContents(marker); //pega a referência do conteúdo interno para trocarmos a borda do marcador
+                //Nota o método getInfoContents() retornaria a view com a borda da janela e todo conteúdo interno, enquanto o getInfoContents() retorna dados como título e descrição
+
+                // Borda imagem 9-patch
+                linear.setBackgroundResource(R.drawable.janela_marker); //customiza a borda com nossa imagem 9-patch (imagem especial que estica sem perder a resolução)
+                return linear; //retornar null nesse método deixaria a info com a borda padrão
+            }
+            @Override
+            public View getInfoContents(Marker marker) { //customiza o conteúdo interno da janela de Info do Marcador
+                // View com o conteúdo
+                LinearLayout linear = new LinearLayout(getBaseContext());
+                linear.setLayoutParams(new LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                linear.setOrientation(LinearLayout.VERTICAL);
+
+                TextView t = new TextView(getBaseContext());
+                t.setText("*** View customizada *** ");
+                t.setTextColor(Color.BLACK);
+                t.setGravity(Gravity.CENTER);
+                linear.addView(t);
+
+                TextView tTitle = new TextView(getBaseContext());
+                tTitle.setText(marker.getTitle()); //obtém o conteúdo do título
+                tTitle.setTextColor(Color.RED);
+                linear.addView(tTitle);
+
+                TextView tSnippet = new TextView(getBaseContext());
+                tSnippet.setText(marker.getSnippet()); //obtém o conteúdo do Snippet
+                tSnippet.setTextColor(Color.BLUE);
+                linear.addView(tSnippet);
+
+                return linear;
+            }
+        });
+    }
+
 
 
 }
