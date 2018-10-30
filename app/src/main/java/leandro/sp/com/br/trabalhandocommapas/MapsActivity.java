@@ -39,6 +39,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -286,6 +287,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Adiciona o marcador no mapa
         mMap.addMarker(markerOptions);
 
+    }
+
+    protected void adicionaPolyline(GoogleMap map,LatLng latLng, LatLng latLng2) {
+        // Desenha uma linha entre dois pontos
+        PolylineOptions line = new PolylineOptions();
+        line.add(new LatLng(latLng.latitude, latLng.longitude));
+        line.add(new LatLng(latLng2.latitude, latLng2.longitude));
+        line.color(Color.BLUE);
+        Polyline polyline = map.addPolyline(line);
+        polyline.setGeodesic(true);
     }
 
     private void adicionarListenerParaCliqueEmMarcador(GoogleMap mMap){
