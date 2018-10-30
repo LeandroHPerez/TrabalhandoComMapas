@@ -29,6 +29,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -55,6 +56,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     LatLng latLngRuaJoseParonetto =  new LatLng(-21.784125, -48.14906);
+
+    LatLng latLngRuaJoseParonetto2 = new LatLng(-21.783649, -48.148783);
 
     //private FusedLocationProviderClient mFusedLocationClient;
 
@@ -85,9 +88,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+
         mapFragment.getMapAsync(this);
-
-
 
 
 
@@ -146,6 +148,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
 
 
+
         /* original
         mMap = googleMap;
 
@@ -163,6 +166,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
 
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            //User has previously accepted this permission
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                //Exibe a localização do usuário - antes de ser chamado exige a permissão ACCESS_FINE_LOCATION (GPS)
+                mMap.setMyLocationEnabled(true);
+            }
+            else {
+                Toast.makeText(MapsActivity.this, "Você deve aceitar as permissões necessárias de localização para poder utilizar este aplicativo", Toast.LENGTH_SHORT).show();
+                finish(); //sai do app
+            }
+        } else {
+            //Fora da api-23, não é necessário verificar em runtime a permissão
+            mMap.setMyLocationEnabled(true);
+        }
+
+
+
+
         // Configuração da câmera com animação
         final CameraPosition position = new CameraPosition.Builder()
                 .target( latLngRuaJoseParonetto )     //  Localização
@@ -178,26 +201,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         //Marcadores adicionados ao mapa
-        // Criando um objeto do tipo MarkerOptions
-        final MarkerOptions markerOptions = new MarkerOptions();
+        adicionarMarcador(mMap, google, "Google Inc.", "Sede da Google", null);
 
-        // Configurando as propriedades do marker
-        markerOptions.position( google )	// Localização
-                .title("Google Inc.")	    // Título
-                .snippet("Sede da Google"); // Descrição
+        //Marcador com imagem padrão
+        adicionarMarcador(mMap, latLngRuaJoseParonetto, "Ponto Adicionado", "Ponto de teste", null);
 
-        // Adicionando marcador ao mapa
-        mMap.addMarker( markerOptions );
-
-
-        // Configurando as propriedades do marker
-        markerOptions.position( latLngRuaJoseParonetto )	// Localização
-                .title("Ponto Adicionado")	        // Título
-                .snippet("Ponto de teste");         // Descrição
-
-        // Adicionando marcador ao mapa
-        mMap.addMarker( markerOptions );
-
+        //Marcador com imagem customizada
+        adicionarMarcador(mMap, latLngRuaJoseParonetto2, "Ponto Adicionado com imagem", "Ponto de teste imagem", R.mipmap.ic_launcher);
         // Fim Marcadores adicionados ao mapa
 
 
@@ -301,7 +311,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    private void adicionarMarcador(GoogleMap mMap, LatLng latLng, String titulo, String snippet, Integer idRecursoImagem ) {
 
+        MarkerOptions markerOptions = new MarkerOptions();
+        // Configurando as propriedades do marker
+        markerOptions.position( latLng )	// Localização
+                .title(titulo)	    // Título
+                .snippet(snippet); // Descrição
+        //Customiza o ícone do marcador
+        if(idRecursoImagem != null){
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(idRecursoImagem));
+        }
+
+        //Adiciona o marcador no mapa
+        mMap.addMarker(markerOptions);
+
+    }
 
 
 }
