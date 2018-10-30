@@ -51,6 +51,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     LatLng google = new LatLng(40.740637, -74.002039);
 
+    LatLng latLngAvPaulista = new LatLng(-23.564224, -46.653156);
+
+
+    LatLng latLngRuaJoseParonetto =  new LatLng(-21.784125, -48.14906);
+
     //private FusedLocationProviderClient mFusedLocationClient;
 
 
@@ -81,6 +86,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
+
 
 
         context = getApplicationContext();
@@ -121,38 +129,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    /*
-    public void onStart() {
-        super.onStart();
-        // Initiating the connection
-        googleApiClient.connect();
-    }
-    public void onStop() {
-        super.onStop();
-        // Disconnecting the connection
-        googleApiClient.disconnect();
-    }
-*/
-
-
-
-    /*
-    //Callback invoked once the GoogleApiClient is connected successfully
-    @Override
-    public void onConnected(Bundle bundle) {
-        //Fetching the last known location using the FusedLocationProviderApi
-    }
-    @Override
-    public void onConnectionSuspended(int i) {
-    }
-    //Callback invoked if the GoogleApiClient connection fails
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-    }
-
-    */
-
-
 
 
 
@@ -182,37 +158,51 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         mMap = googleMap;
-        // Localização sede da Google
-        //LatLng google = new LatLng(40.740637, -74.002039);
-        // Configuração da câmera
+
+        //Ajustar o tipo de mapa  - (GoogleMap.MAP_TYPE_NORMAL, MAP_TYPE_HYBRID, MAP_TYPE_SATELLITE, MAP_TYPE_TERRAIN, MAP_TYPE_NONE
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+
+        // Configuração da câmera com animação
         final CameraPosition position = new CameraPosition.Builder()
-                .target( google )     //  Localização
-                .bearing( 45 )        //  Rotação da câmera
-                .tilt( 90 )             //  Ângulo em graus
-                .zoom( 17 )           //  Zoom // a partir do 17 fica em 3d
+                .target( latLngRuaJoseParonetto )     //  Localização
+                .bearing( 45 )                        //  Rotação da câmera em graus
+                .tilt( 90 )                           //  Ângulo que a câmera está posicionada em graus
+                .zoom( 17 )                           //  Zoom // a partir do 17 fica em 3d
                 .build();
         CameraUpdate update = CameraUpdateFactory.newCameraPosition( position );
+        //mMap.moveCamera(update); //movimenta a câmera bruscamente, sem animação
         mMap.animateCamera( update ); //uma animação ao movimentar a camera
 
-        //LatLng sydney = new LatLng(-34, 151);
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
 
 
+        //Marcadores adicionados ao mapa
         // Criando um objeto do tipo MarkerOptions
         final MarkerOptions markerOptions = new MarkerOptions();
 
         // Configurando as propriedades do marker
         markerOptions.position( google )	// Localização
-                .title("Google Inc.")	// Título
+                .title("Google Inc.")	    // Título
                 .snippet("Sede da Google"); // Descrição
 
         // Adicionando marcador ao mapa
         mMap.addMarker( markerOptions );
 
 
+        // Configurando as propriedades do marker
+        markerOptions.position( latLngRuaJoseParonetto )	// Localização
+                .title("Ponto Adicionado")	        // Título
+                .snippet("Ponto de teste");         // Descrição
+
+        // Adicionando marcador ao mapa
+        mMap.addMarker( markerOptions );
+
+        // Fim Marcadores adicionados ao mapa
 
 
+
+        //Listener para cliques no mapa
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -228,13 +218,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 // Configurando as propriedades da Linha - traçar uma linha entre dois markers - o anteriornmente criado e o novo criado ao clicar
                 PolylineOptions polylineOptions = new PolylineOptions();
-                polylineOptions.add( google );
+                polylineOptions.add( latLngRuaJoseParonetto );
                 polylineOptions.add( latLng );
                 polylineOptions.color( Color.BLUE );
                 // Adiciona a linha no mapa
                 mMap.addPolyline( polylineOptions );
 
+                //Para mover a câmera para o ponto de clique:
+                CameraUpdate update = CameraUpdateFactory.newLatLng( latLng );
+                mMap.animateCamera(update);
 
+
+            }
+        });
+
+
+
+        //Listener para movimento de câmera, executado quando o movimento termina
+        //Atualmente existem três listeners de câmera:
+        // 1 - GoogleMap.OnCameraMoveStartedListener,
+        // 2 - GoogleMap.OnCameraMoveListener,
+        // 3 - GoogleMap.OnCameraIdleListener
+        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                LatLng mPosition = mMap.getCameraPosition().target;
+                float mZoom = mMap.getCameraPosition().zoom;
+
+                double latitude =  mMap.getCameraPosition().target.latitude;
+                double longitude =  mMap.getCameraPosition().target.longitude;
+
+                Toast.makeText(MapsActivity.this, "OnCameraIdleListener() -> Latitude: " + latitude + ", Longitude: "+ longitude, Toast.LENGTH_SHORT).show();
             }
         });
 
