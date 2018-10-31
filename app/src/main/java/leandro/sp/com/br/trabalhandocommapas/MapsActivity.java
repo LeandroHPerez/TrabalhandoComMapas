@@ -144,7 +144,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         //Ajustar o tipo de mapa  - (GoogleMap.MAP_TYPE_NORMAL, MAP_TYPE_HYBRID, MAP_TYPE_SATELLITE, MAP_TYPE_TERRAIN, MAP_TYPE_NONE
-        mMap.setMapType(GoogleMap.MAP_TYPE_NONE);
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
 
 
@@ -156,16 +156,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.setMyLocationEnabled(true);
 
 
+
+
                 // Localização forçada da bolinha - colocando ela onde queremos que fique
-                // Localização do mapa (Av. Paulista - SP)
-                LatLng latLng = new LatLng(-23.564224, -46.653156);
-
-
-                locationSource = new LocationSourceUtil();
-                //mMap.setMyLocationEnabled(true);
-                mMap.setLocationSource(locationSource);
-                //locationSource.setLocation(latLng);
-                locationSource.setLocation(latLngRuaJoseParonetto);
+                forcarLocalizacao(mMap, latLngRuaJoseParonetto);
             }
             else {
                 Toast.makeText(MapsActivity.this, "Você deve aceitar as permissões necessárias de localização para poder utilizar este aplicativo", Toast.LENGTH_SHORT).show();
@@ -410,6 +404,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+
+    private void forcarLocalizacao(final GoogleMap mMap, LatLng latLng) {
+        // Localização forçada da bolinha - colocando ela onde queremos que fique
+        // Localização do mapa (Av. Paulista - SP)
+        //LatLng latLng = new LatLng(-23.564224, -46.653156);
+
+
+        locationSource = new LocationSourceUtil();
+        //mMap.setMyLocationEnabled(true);
+        mMap.setLocationSource(locationSource);
+        //locationSource.setLocation(latLng);
+        locationSource.setLocation(latLng);
+
+    }
 
 
 }
