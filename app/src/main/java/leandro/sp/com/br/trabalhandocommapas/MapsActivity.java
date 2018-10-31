@@ -88,6 +88,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     private TextView textViewDebug; //textView utilizado para mensagens de debug
+    protected LocationSourceUtil locationSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,6 +154,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 //Exibe a localização do usuário (aquela bolinha azul no mapa) - antes de ser chamado exige a permissão ACCESS_FINE_LOCATION (GPS)
                 mMap.setMyLocationEnabled(true);
+
+
+                // Localização forçada da bolinha - colocando ela onde queremos que fique
+                // Localização do mapa (Av. Paulista - SP)
+                LatLng latLng = new LatLng(-23.564224, -46.653156);
+
+
+                locationSource = new LocationSourceUtil();
+                //mMap.setMyLocationEnabled(true);
+                mMap.setLocationSource(locationSource);
+                //locationSource.setLocation(latLng);
+                locationSource.setLocation(latLngRuaJoseParonetto);
             }
             else {
                 Toast.makeText(MapsActivity.this, "Você deve aceitar as permissões necessárias de localização para poder utilizar este aplicativo", Toast.LENGTH_SHORT).show();
