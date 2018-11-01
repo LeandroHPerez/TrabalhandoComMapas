@@ -17,14 +17,14 @@ public class LocationSourceUtil implements LocationSource {
         this.listener = null;
     }
 
-    //Método público para atualziar a posição da layer (bolinha azul) da localização do usuário
+    //Método público para atualizar a posição da layer (bolinha azul) da localização do usuário
     public void setLocation(Location location) {
         if(this.listener != null) {
             this.listener.onLocationChanged(location); //Recebeu uma nova location e notifica o OnLocationChangedListener / atualiza a posição
         }
     }
 
-    //Método público para atualziar a posição da layer (bolinha azul) da localização do usuário
+    //Método público para atualizar a posição da layer (bolinha azul) da localização do usuário
     public void setLocation(LatLng latLng) {
         Location location = new Location(LocationManager.GPS_PROVIDER);
         location.setLatitude(latLng.latitude);
